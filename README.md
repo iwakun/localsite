@@ -4,7 +4,7 @@ Script to easily setup a local instances of websites. Also gives some tools to h
 <h2>Installation</h2>
 <h3>Linux</h3>
 
-Link 
+Link the file to your `/usr/bin` directory
 
 `sudo ln -s /<directory of file>/localsite.sh /usr/bin/localsite `
 
