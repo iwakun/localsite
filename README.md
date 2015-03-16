@@ -3,10 +3,10 @@ Script to easily setup a local instances of websites. Also gives some tools to h
 
 <h2>Installation</h2>
 <h3>Linux</h3>
-
-Link the file to your `/usr/bin` directory
-
-`sudo ln -s /<directory of file>/localsite.sh /usr/bin/localsite `
+* Copy file to the directory of your choosing.
+* Change line 3 to the appropriate values `SITE_DIR=/location/of/the/localsite.sh/file`
+* Change line 2 if needed `APACHE_CONF_DIR=/etc/apache2`
+* Link the file to your `/usr/bin` directory `sudo ln -s /<directory of file>/localsite.sh /usr/bin/localsite `
 
 <h2>Usage</h2>
 
