@@ -1,7 +1,7 @@
 # localsite
 Script to easily setup a local instances of websites.
 
-Usage: localsite [&45;&45;help] [&lt;command&gt; [&lt;sitename&gt;]]
+Usage: localsite [`--`help] [&lt;command&gt; [&lt;sitename&gt;]]
 
 Use the full site name (e.g., www.elikirk.com) for the &lt;sitename&gt;
 
