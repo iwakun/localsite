@@ -1,7 +1,7 @@
 # localsite
-Script to easily setup a local instances of websites.
+Script to easily setup a local instances of websites. Also gives some tools to help manage the sites.
 
-Usage: localsite [`--`help] [&lt;command&gt; [&lt;sitename&gt;]]
+Usage: `localsite [--help] [<command> [<sitename>]]`
 
 Use the full site name (e.g., www.elikirk.com) for the &lt;sitename&gt;
 
