@@ -6,19 +6,33 @@ APACHE_CONF_DIR=/etc/apache2
 if [ "$1" == "-h" -o "$1" == "--help" ]
 	then 
 		cat <<EOF 
-Usage: `basename $0` [--help] <command> <sitename>
+Usage: `basename $0` [--help] [<command> [<sitename>]]
 
 Use the full site name (e.g., www.elikirk.com) for the <sitename>
 
 Commands:
+   list        List all the sites created by script
    install     Creates a directory, creates a apache.conf file, enables the
                site adds site to hosts file
+			   Requires: <sitename>
    uninstall   Removes site from hosts file, disables site, deletes 
                apache.conf file, removes directory
+			   Requires: <sitename>
    disable     Comments out line in hosts file
+               Requires: <sitename>
    enable      Un-comments line in hosts file
+               Requires: <sitename>
 EOF
 	exit 1
+fi
+
+if [ $1 = "list" ]
+	then
+		echo "---------------------------------------------------------"
+		echo "- Sites set up by localsite (sites with # are disabled) -"
+		echo "---------------------------------------------------------"
+		sed -n '/Custom Local Sites/,/END localsite/p' /etc/hosts | sed 's/\(#\)*[^ ]* /\1/' | tail -n +2 | head -n -1
+		exit 1
 fi
 
 if [ "$EUID" -ne 0 ]
@@ -64,7 +78,13 @@ EOF
 		service apache2 restart
 		
 		echo "Adding $SITE to hosts file"
-		echo "127.0.0.1 $SITE" | tee --append /etc/hosts > /dev/null
+		LINE_NUMBER=`grep -n "Custom Local Sites" /etc/hosts | head -1 | cut -d: -f1`
+		if [ -z $LINE_NUMBER ] 
+			then
+				echo -e "### Custom Local Sites (added by localsite script) ###\n### END localsite sites ###" | 
+					tee --append /etc/hosts > /dev/null
+		fi
+		sed -i "s/### END/127.0.0.1 $SITE\n### END/" /etc/hosts
 		exit 1
 fi
 
