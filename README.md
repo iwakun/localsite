@@ -26,9 +26,10 @@ Lists all the sites created by script
 `sudo localsite install <sitename>`
 
 Does the following things:
-* Creates a directory
+* Creates a directory `<sitename>`
 * Creates an apache.conf file `<sitename>.conf`
 * Enables the site using `a2ensite`
+* Restarts apache
 * Adds site to hosts file
 
 <h3>Uninstall</h3>
@@ -38,6 +39,7 @@ Does the following things
 * Removes site from hosts file
 * Disables site using `a2dissite`
 * Deletes apache.conf file
+* Restarts apache
 * Removes directory
 
 <h3>Disable</h3>
