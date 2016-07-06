@@ -4,8 +4,8 @@ APACHE_CONF_DIR=/etc/apache2
 
 # Setup apache for local site
 if [ "$1" == "-h" -o "$1" == "--help" ]
-	then 
-		cat <<EOF 
+	then
+		cat <<EOF
 Usage: `basename $0` [--help] [<command> [<sitename>]]
 
 Use the full site name (e.g., www.elikirk.com) for the <sitename>
@@ -15,7 +15,7 @@ Commands:
    install     Creates a directory, creates a apache.conf file, enables the
                site adds site to hosts file
 			   Requires: <sitename>
-   uninstall   Removes site from hosts file, disables site, deletes 
+   uninstall   Removes site from hosts file, disables site, deletes
                apache.conf file, removes directory
 			   Requires: <sitename>
    disable     Comments out line in hosts file
@@ -41,7 +41,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 if [ -z "$2" ]
-	then 
+	then
 		echo "Please provide a site name"
 		exit 1
 	else
@@ -52,7 +52,7 @@ if [ $1 = "install" ]
 	then
 		echo "Making directory in $SITE_DIR/$SITE"
 		mkdir $SITE_DIR/$SITE
-		chown $USER:$USER $SITE_DIR/$SITE
+		chown $SUDO_USER:$SUDO_USER $SITE_DIR/$SITE
 		chmod 775 $SITE_DIR/$SITE
 
 		echo "Writing apache.conf file"
@@ -73,15 +73,15 @@ if [ $1 = "install" ]
 EOF
 		echo "Configuring $SITE with a2ensite"
 		a2ensite $SITE
-		
+
 		echo "Restarting Apache"
-		service apache2 restart
-		
+        systemctl restart apache2
+
 		echo "Adding $SITE to hosts file"
 		LINE_NUMBER=`grep -n "Custom Local Sites" /etc/hosts | head -1 | cut -d: -f1`
-		if [ -z $LINE_NUMBER ] 
+		if [ -z $LINE_NUMBER ]
 			then
-				echo -e "### Custom Local Sites (added by localsite script) ###\n### END localsite sites ###" | 
+				echo -e "### Custom Local Sites (added by localsite script) ###\n### END localsite sites ###" |
 					tee --append /etc/hosts > /dev/null
 		fi
 		sed -i "s/### END/127.0.0.1 $SITE\n### END/" /etc/hosts
@@ -98,7 +98,7 @@ if [ $1 = "uninstall" ]
 
 		echo "Deleting $SITE apache.conf file"
 		rm $APACHE_CONF_DIR/sites-available/${SITE}.conf
-		
+
 		echo "Deleting folder for $SITE"
 		rm -rf $SITE_DIR/$SITE
 
