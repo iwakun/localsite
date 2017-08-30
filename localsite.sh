@@ -1,5 +1,5 @@
 #!/bin/bash
-SITE_DIR=~/Programming/Local
+SITE_DIR=~/Programming/
 APACHE_CONF_DIR=/etc/apache2
 
 # Setup apache for local site
@@ -130,6 +130,7 @@ if [ $1 = "perms" ]
 	then
 		echo "Setting up permissions for $SITE"
 		APACHE_USER=$(ps axho user,comm|grep -E "httpd|apache|www-data"|uniq|grep -v "root"|awk 'END {if ($1) print $1}')
+		echo "Apache user found: $APACHE_USER"
 		chown -R $APACHE_USER:$APACHE_USER $SITE_DIR/$SITE
 		chmod -R 775 $SITE_DIR/$SITE
 		echo "Permissions set for $SITE"
