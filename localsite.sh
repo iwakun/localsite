@@ -1,5 +1,5 @@
 #!/bin/bash
-SITE_DIR=/home/chris/Documents/Websites/Local
+SITE_DIR=~/Programming/Local
 APACHE_CONF_DIR=/etc/apache2
 
 # Setup apache for local site
@@ -22,6 +22,8 @@ Commands:
                Requires: <sitename>
    enable      Un-comments line in hosts file
                Requires: <sitename>
+   perms       Sets ownership to apache_user:apache_user with user and
+               group RWX permissions set
 EOF
 	exit 1
 fi
@@ -121,6 +123,16 @@ if [ $1 = "enable" ]
 		LINE_NUMBER=`grep -n "$SITE" /etc/hosts | head -1 | cut -d: -f1`
 		cat /etc/hosts | sed -i "$LINE_NUMBER s/^#//" /etc/hosts
 		echo "/etc/hosts:$LINE_NUMBER `sed -n "${LINE_NUMBER}p" /etc/hosts`"
+		exit 1
+fi
+
+if [ $1 = "perms" ]
+	then
+		echo "Setting up permissions for $SITE"
+		APACHE_USER=$(ps axho user,comm|grep -E "httpd|apache|www-data"|uniq|grep -v "root"|awk 'END {if ($1) print $1}')
+		chown -R $APACHE_USER:$APACHE_USER $SITE_DIR/$SITE
+		chmod -R 775 $SITE_DIR/$SITE
+		echo "Permissions set for $SITE"
 		exit 1
 fi
 
