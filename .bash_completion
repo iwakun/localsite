@@ -1,0 +1,3 @@
+for CFILE in ~/.bash_completion.d/*; do
+	[ -f "$CFILE" ] && . $CFILE
+done

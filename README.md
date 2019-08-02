@@ -51,3 +51,9 @@ Comments out line with &lt;sitename&gt; in hosts file
 `sudo localsite enable <sitename>`
 
 Un-comments line with &lt;sitename&gt; in hosts file
+
+<h2>Tab Completion</h2>
+
+Injects all installed site names into bash tab completion.
+* Copy file to `~/.bash_completion.d/` directory
+* If you don't already have it, copy the `.bash_completion` file to your home directory

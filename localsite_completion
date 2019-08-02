@@ -1,0 +1,13 @@
+_localsite()
+{
+	local CUR=${COMP_WORDS[COMP_CWORD]}
+	SITES=$(
+		sed -n '/Custom Local Sites/,/END localsite/p' /etc/hosts |
+		tail -n +2 |
+		head -n -1 |
+		sed 's/.*[^ ]* //' |
+		tr '\n' ' '
+	)
+	COMPREPLY=( $(compgen -W "$SITES" -- $CUR) )
+}
+complete -F _localsite localsite
