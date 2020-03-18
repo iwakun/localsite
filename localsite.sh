@@ -1,5 +1,5 @@
 #!/bin/bash
-SITE_DIR=~/Programming/
+SITE_DIR=~/Programming
 APACHE_CONF_DIR=/etc/apache2
 
 # Setup apache for local site
@@ -52,13 +52,28 @@ fi
 
 if [ $1 = "install" ]
 	then
-		echo "Making directory in $SITE_DIR/$SITE"
+		echo -e "Making directory in $SITE_DIR/$SITE\n"
 		mkdir $SITE_DIR/$SITE
 		chown $SUDO_USER:$SUDO_USER $SITE_DIR/$SITE
 		chmod 775 $SITE_DIR/$SITE
 
-		echo "Writing apache.conf file"
+		echo -e "Generating SSL Certificate\n"
+		openssl req -new \
+			-subj "/CN=$SITE" \
+			-addext "subjectAltName=DNS:$SITE" \
+			-x509 \
+			-newkey rsa:4096 \
+			-sha256 \
+			-days 3650 \
+			-nodes \
+			-keyout /etc/ssl/certs/$SITE.key \
+			-out /etc/ssl/certs/$SITE.crt
+
+		echo -e "Writing apache.conf file\n"
 		cat <<EOF > $APACHE_CONF_DIR/sites-available/${SITE}.conf
+NameVirtualHost *:443
+NameVirtualHost *:80
+
 <VirtualHost *:80>
 	ServerName $SITE
 	DocumentRoot $SITE_DIR/$SITE
@@ -72,14 +87,32 @@ if [ $1 = "install" ]
 		Require all granted
 	</Directory>
 </VirtualHost>
+
+<VirtualHost *:443>
+	ServerName $SITE
+	DocumentRoot $SITE_DIR/$SITE
+	ErrorLog \${APACHE_LOG_DIR}/error.log
+	CustomLog \${APACHE_LOG_DIR}/access.log combined
+	<Directory $SITE_DIR/$SITE>
+		DirectoryIndex index.html index.php
+		AllowOverride All
+		Order allow,deny
+		Allow from all
+		Require all granted
+	</Directory>
+	SSLEngine on
+	SSLOptions +StrictRequire
+	SSLCertificateFile /etc/ssl/certs/$SITE.crt
+	SSLCertificateKeyFile /etc/ssl/certs/$SITE.key
+</VirtualHost>
 EOF
-		echo "Configuring $SITE with a2ensite"
+		echo -e "Configuring $SITE with a2ensite\n"
 		a2ensite $SITE
 
-		echo "Restarting Apache"
+		echo -e "Restarting Apache\n"
         systemctl restart apache2
 
-		echo "Adding $SITE to hosts file"
+		echo -e "Adding $SITE to hosts file\n"
 		LINE_NUMBER=`grep -n "Custom Local Sites" /etc/hosts | head -1 | cut -d: -f1`
 		if [ -z $LINE_NUMBER ]
 			then
@@ -92,16 +125,20 @@ fi
 
 if [ $1 = "uninstall" ]
 	then
-		echo "Disabling $SITE with a2dissite"
+		echo -e "Disabling $SITE with a2dissite\n"
 		a2dissite $SITE
 
-		echo "Removing $SITE from hosts file"
+		echo -e "Removing SSL Certificates\n"
+		rm /etc/ssl/certs/$SITE.crt
+		rm /etc/ssl/certs/$SITE.key
+
+		echo -e "Removing $SITE from hosts file\n"
 		sed -i "/$SITE/d" /etc/hosts
 
-		echo "Deleting $SITE apache.conf file"
+		echo -e "Deleting $SITE apache.conf file\n"
 		rm $APACHE_CONF_DIR/sites-available/${SITE}.conf
 
-		echo "Deleting folder for $SITE"
+		echo -e "Deleting folder for $SITE\n"
 		rm -rf $SITE_DIR/$SITE
 
 		echo "$SITE removed"
@@ -110,7 +147,7 @@ fi
 
 if [ $1 = "disable" ]
 	then
-		echo "Disabling $SITE"
+		echo -e "Disabling $SITE\n"
 		LINE_NUMBER=`grep -n "$SITE" /etc/hosts | head -1 | cut -d: -f1`
 		sed -i "$LINE_NUMBER s/^\(.*\)$/#\\1/" /etc/hosts
 		echo "/etc/hosts:$LINE_NUMBER `sed -n "${LINE_NUMBER}p" /etc/hosts`"
@@ -119,7 +156,7 @@ fi
 
 if [ $1 = "enable" ]
 	then
-		echo "Enabling $SITE"
+		echo -e "Enabling $SITE\n"
 		LINE_NUMBER=`grep -n "$SITE" /etc/hosts | head -1 | cut -d: -f1`
 		cat /etc/hosts | sed -i "$LINE_NUMBER s/^#//" /etc/hosts
 		echo "/etc/hosts:$LINE_NUMBER `sed -n "${LINE_NUMBER}p" /etc/hosts`"
@@ -128,9 +165,9 @@ fi
 
 if [ $1 = "perms" ]
 	then
-		echo "Setting up permissions for $SITE"
+		echo -e "Setting up permissions for $SITE\n"
 		APACHE_USER=$(ps axho user,comm|grep -E "httpd|apache|www-data"|uniq|grep -v "root"|awk 'END {if ($1) print $1}')
-		echo "Apache user found: $APACHE_USER"
+		echo -e "Apache user found: $APACHE_USER\n"
 		chown -R $APACHE_USER:$APACHE_USER $SITE_DIR/$SITE
 		chmod -R 775 $SITE_DIR/$SITE
 		echo "Permissions set for $SITE"
