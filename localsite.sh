@@ -1,6 +1,7 @@
 #!/bin/bash
-SITE_DIR=~/Programming
+SITE_DIR=/home/chris/Programming
 APACHE_CONF_DIR=/etc/apache2
+DEFAULTUSER=chris
 
 # Setup apache for local site
 if [ "$1" == "-h" -o "$1" == "--help" ]
@@ -9,6 +10,9 @@ if [ "$1" == "-h" -o "$1" == "--help" ]
 Usage: `basename $0` [--help] [<command> [<sitename>]]
 
 Use the full site name (e.g., www.elikirk.com) for the <sitename>
+
+Flags:
+   s           Also set up https
 
 Commands:
    list        List all the sites created by script
@@ -52,24 +56,16 @@ fi
 
 if [ $1 = "install" ]
 	then
+		sudo -u $DEFAULTUSER mkcert $SITE
+		mv $SITE.pem $SITE-key.pem /etc/ssl/certs/
 		echo -e "Making directory in $SITE_DIR/$SITE\n"
 		mkdir $SITE_DIR/$SITE
 		chown $SUDO_USER:$SUDO_USER $SITE_DIR/$SITE
 		chmod 775 $SITE_DIR/$SITE
 
-		echo -e "Generating SSL Certificate\n"
-		openssl req -new \
-			-subj "/CN=$SITE" \
-			-addext "subjectAltName=DNS:$SITE" \
-			-x509 \
-			-newkey rsa:4096 \
-			-sha256 \
-			-days 3650 \
-			-nodes \
-			-keyout /etc/ssl/certs/$SITE.key \
-			-out /etc/ssl/certs/$SITE.crt
-
 		echo -e "Writing apache.conf file\n"
+		touch $APACHE_CONF_DIR/sites-available/${SITE}.conf
+
 		cat <<EOF > $APACHE_CONF_DIR/sites-available/${SITE}.conf
 NameVirtualHost *:443
 NameVirtualHost *:80
@@ -102,10 +98,11 @@ NameVirtualHost *:80
 	</Directory>
 	SSLEngine on
 	SSLOptions +StrictRequire
-	SSLCertificateFile /etc/ssl/certs/$SITE.crt
-	SSLCertificateKeyFile /etc/ssl/certs/$SITE.key
+	SSLCertificateFile /etc/ssl/certs/$SITE.pem
+	SSLCertificateKeyFile /etc/ssl/certs/$SITE-key.pem
 </VirtualHost>
 EOF
+
 		echo -e "Configuring $SITE with a2ensite\n"
 		a2ensite $SITE
 
@@ -128,12 +125,11 @@ if [ $1 = "uninstall" ]
 		echo -e "Disabling $SITE with a2dissite\n"
 		a2dissite $SITE
 
-		echo -e "Removing SSL Certificates\n"
-		rm /etc/ssl/certs/$SITE.crt
-		rm /etc/ssl/certs/$SITE.key
-
 		echo -e "Removing $SITE from hosts file\n"
 		sed -i "/$SITE/d" /etc/hosts
+
+		echo -e "Deleting $SITE certs\n"
+		rm /etc/ssl/certs/${SITE}.pem /etc/ssl/certs/${SITE}-key.pem
 
 		echo -e "Deleting $SITE apache.conf file\n"
 		rm $APACHE_CONF_DIR/sites-available/${SITE}.conf

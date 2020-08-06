@@ -8,6 +8,13 @@ Script to easily setup a local instances of websites. Also gives some tools to h
 * Link the file to your `/usr/local/bin` directory `sudo ln -s /directory/of/file/localsite.sh /usr/local/bin/localsite `
 * (OPTIONAL) Link the helper scripts `wp_image_sync.sh` and `setup_wordpress_database.sh` to the `/usr/local/bin` directory
 * (OPTIONAL) Copy the `localsite_completion` file to `/etc/bash_completion.d/` directory
+* Install `mkcert` for using https (`https://github.com/FiloSottile/mkcert`)
+** Install the cert util `sudo apt install libnss3-tools`
+** Install go `sudo apt install golang-go`
+** Clone the mkcert repo `git clone https://github.com/FiloSottile/mkcert`
+** Compile `go build -ldflags "-X main.Version=$(git describe --tags)"`
+** Link the file `sudo ln -s /directory/of/file/mkcert /usr/local/bin/mkcert`
+** Run `mkcert -install`
 
 <h2>Usage</h2>
 
@@ -28,6 +35,7 @@ Lists all the sites created by script
 
 Does the following things:
 * Creates a directory `<sitename>`
+* Creates a certificate/key pair and copies to `/etc/ssl/certs/`
 * Creates an apache.conf file `<sitename>.conf`
 * Enables the site using `a2ensite`
 * Restarts apache
@@ -52,9 +60,3 @@ Comments out line with &lt;sitename&gt; in hosts file
 `sudo localsite enable <sitename>`
 
 Un-comments line with &lt;sitename&gt; in hosts file
-
-<h2>Tab Completion</h2>
-
-Injects all installed site names into bash tab completion.
-* Copy file to `~/.bash_completion.d/` directory
-* If you don't already have it, copy the `.bash_completion` file to your home directory
