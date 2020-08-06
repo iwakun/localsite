@@ -53,6 +53,7 @@ Does the following things:
 
 Does the following things
 - Removes site from hosts file
+- Removes certs
 - Disables site using `a2dissite`
 - Deletes apache.conf file
 - Restarts apache
