@@ -67,9 +67,6 @@ if [ $1 = "install" ]
 		touch $APACHE_CONF_DIR/sites-available/${SITE}.conf
 
 		cat <<EOF > $APACHE_CONF_DIR/sites-available/${SITE}.conf
-NameVirtualHost *:443
-NameVirtualHost *:80
-
 <VirtualHost *:80>
 	ServerName $SITE
 	DocumentRoot $SITE_DIR/$SITE
